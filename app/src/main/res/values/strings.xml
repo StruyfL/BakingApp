@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">BakingApp</string>
+
+    <!-- Strings for the recipe items -->
+    <string name="recipe_image_description">Recipe Picture</string>
+    <string name="recipe_name_tools">Recipe Name</string>
+</resources>
