@@ -32,7 +32,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeView
 
         RecipeViewHolder recipeViewHolder = new RecipeViewHolder(view);
 
-        return null;
+        return recipeViewHolder;
     }
 
     @Override
