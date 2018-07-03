@@ -37,13 +37,12 @@ public class RecipeJsonParser {
         Recipe[] recipes =  new Recipe[recipeArray.length()];
 
         for(int i = 0; i < recipeArray.length(); i++) {
+            recipes[i] = new Recipe();
             JSONObject recipeObject = recipeArray.getJSONObject(i);
             recipes[i].setId(recipeObject.getInt(RECIPE_ID));
 
             Log.d(TAG, String.valueOf(recipes[i].getId()));
         }
-
-
 
         return null;
     }
