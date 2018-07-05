@@ -3,6 +3,9 @@ package com.lssoftworks.u0068830.bakingapp;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.widget.Adapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -10,6 +13,7 @@ import com.lssoftworks.u0068830.bakingapp.Data.Recipe;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -24,12 +28,17 @@ public class DetailsActivity extends AppCompatActivity {
     private String[] mQuantity;
     private String[] mMeasure;
     private String[] mIngredient;
+    private StepAdapter mAdapter;
+    private static ArrayList<Recipe.Step> mSteps;
 
     @BindView(R.id.tv_recipe_name)
     TextView mRecipeName;
 
     @BindView(R.id.ll_ingredients)
     LinearLayout mIngredientList;
+
+    @BindView(R.id.rv_steps)
+    RecyclerView mStepList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +57,7 @@ public class DetailsActivity extends AppCompatActivity {
         mQuantity = mRecipe.getQuantity();
         mMeasure = mRecipe.getMeasure();
         mIngredient = mRecipe.getIngredient();
+        mSteps = new ArrayList<>(Arrays.asList(mRecipe.getSteps()));
 
         for(int i = 0; i < mQuantity.length; i++) {
             LinearLayout ingredientLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.ingredient, mIngredientList, false);
@@ -61,6 +71,13 @@ public class DetailsActivity extends AppCompatActivity {
 
             mIngredientList.addView(ingredientLayout);
         }
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        mStepList.setLayoutManager(linearLayoutManager);
+        mStepList.setHasFixedSize(true);
+
+        mAdapter = new StepAdapter(mSteps);
+        mStepList.setAdapter(mAdapter);
 
     }
 }

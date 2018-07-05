@@ -2,6 +2,7 @@ package com.lssoftworks.u0068830.bakingapp;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,10 +17,11 @@ import butterknife.ButterKnife;
 
 public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder> {
 
-    ArrayList<Recipe.Steps> mStepsList;
+    ArrayList<Recipe.Step> mStepsList;
 
-    public StepAdapter(ArrayList<Recipe.Steps> steps) {
+    public StepAdapter(ArrayList<Recipe.Step> steps) {
         mStepsList = steps;
+        Log.d("StepAdapter", String.valueOf(mStepsList.size()));
     }
 
     @Override
@@ -36,7 +38,7 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
 
     @Override
     public void onBindViewHolder(StepViewHolder holder, int position) {
-        holder.mStepId.setText(mStepsList.get(position).getStepId());
+        holder.mStepId.setText(String.valueOf(mStepsList.get(position).getStepId()));
         holder.mShortDesc.setText(mStepsList.get(position).getShortDescription());
         holder.mDesc.setText(mStepsList.get(position).getDescription());
 
@@ -66,9 +68,6 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
             super(itemView);
 
             ButterKnife.bind(this, itemView);
-
         }
-
     }
-
 }
