@@ -8,11 +8,7 @@ public class Recipe {
     private String[] quantity;
     private String[] measure;
     private String[] ingredient;
-    private int[] stepId;
-    private String[] shortDescription;
-    private String[] description;
-    private String[] videoURL;
-    private String[] thumbnailURL;
+    private Step[] steps;
 
     public int getId() {
         return id;
@@ -70,44 +66,63 @@ public class Recipe {
         this.ingredient = ingredient;
     }
 
-    public int[] getStepId() {
-        return stepId;
+    public Step[] getSteps() {
+        return steps;
     }
 
-    public void setStepId(int[] stepId) {
-        this.stepId = stepId;
+    public void setSteps(Step[] steps) {
+        this.steps = steps;
     }
 
-    public String[] getShortDescription() {
-        return shortDescription;
-    }
+    public class Step {
+        private int stepId;
+        private String shortDescription;
+        private String description;
+        private String videoURL;
+        private String thumbnailURL;
 
-    public void setShortDescription(String[] shortDescription) {
-        this.shortDescription = shortDescription;
-    }
+        Step() {
 
-    public String[] getDescription() {
-        return description;
-    }
+        }
 
-    public void setDescription(String[] description) {
-        this.description = description;
-    }
+        public int getStepId() {
+            return stepId;
+        }
 
-    public String[] getVideoURL() {
-        return videoURL;
-    }
+        public void setStepId(int stepId) {
+            this.stepId = stepId;
+        }
 
-    public void setVideoURL(String[] videoURL) {
-        this.videoURL = videoURL;
-    }
+        public String getShortDescription() {
+            return shortDescription;
+        }
 
-    public String[] getThumbnailURL() {
-        return thumbnailURL;
-    }
+        public void setShortDescription(String shortDescription) {
+            this.shortDescription = shortDescription;
+        }
 
-    public void setThumbnailURL(String[] thumbnailURL) {
-        this.thumbnailURL = thumbnailURL;
-    }
+        public String getDescription() {
+            return description;
+        }
 
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getVideoURL() {
+            return videoURL;
+        }
+
+        public void setVideoURL(String videoURL) {
+            this.videoURL = videoURL;
+        }
+
+        public String getThumbnailURL() {
+            return thumbnailURL;
+        }
+
+        public void setThumbnailURL(String thumbnailURL) {
+            this.thumbnailURL = thumbnailURL;
+        }
+    }
 }

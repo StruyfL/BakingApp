@@ -59,13 +59,10 @@ public class RecipeJsonParser {
 
             JSONArray recipeSteps = recipeObject.getJSONArray(RECIPE_STEPS);
 
-            int[] id = new int[recipeSteps.length()];
-            String[] shortDescription = new String[recipeSteps.length()];
-            String[] description = new String[recipeSteps.length()];
-            String[] videoURL = new String[recipeSteps.length()];
-            String[] thumbnailURL = new String[recipeSteps.length()];
+            Recipe.Step[] steps = new Recipe.Step[recipeSteps.length()];
 
             for(int j = 0; j < recipeSteps.length(); j++) {
+                steps[j] = new Recipe.Step();
                 JSONObject recipeStep = recipeSteps.getJSONObject(j);
                 id[j] = recipeStep.getInt(RECIPE_STEPS_ID);
                 shortDescription[j] = recipeStep.getString(RECIPE_STEPS_SHORTDESCRIPTION);
@@ -77,11 +74,6 @@ public class RecipeJsonParser {
             recipes[i].setQuantity(quantity);
             recipes[i].setMeasure(measure);
             recipes[i].setIngredient(ingredient);
-            recipes[i].setStepId(id);
-            recipes[i].setShortDescription(shortDescription);
-            recipes[i].setDescription(description);
-            recipes[i].setVideoURL(videoURL);
-            recipes[i].setThumbnailURL(thumbnailURL);
 
             Log.d(TAG, String.valueOf(recipes[i].getId()));
         }
