@@ -1,10 +1,14 @@
 package com.lssoftworks.u0068830.bakingapp;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import com.lssoftworks.u0068830.bakingapp.Data.Recipe;
 import com.lssoftworks.u0068830.bakingapp.Network.NetworkUtils;
@@ -19,6 +23,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -30,10 +35,13 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.rv_baking_recipes)
     RecyclerView mBakingRecipes;
 
-    public RecipeAdapter mAdapter;
-    public ArrayList<Recipe> mRecipes;
+    private RecipeAdapter mAdapter;
+    public static ArrayList<Recipe> mRecipes;
     private String mRecipeJson;
+    public static OnViewHolderClickListener viewHolderClickListener;
     private static final String TAG = MainActivity.class.getSimpleName();
+    public static final String EXTRA_RECIPES = "all_recipes";
+    public static final String EXTRA_RECIPE_ID = "recipe_id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,19 +54,24 @@ public class MainActivity extends AppCompatActivity {
         String bakingData = iStreamToString(is);
 
         try {
-            getRecipes(bakingData);
+            mRecipes = new ArrayList<>(Arrays.asList(getRecipes(bakingData)));
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        mBakingRecipes.setLayoutManager(linearLayoutManager);
+        mBakingRecipes.setHasFixedSize(true);
 
         mAdapter = new RecipeAdapter(mRecipes);
         mBakingRecipes.setAdapter(mAdapter);
+
+        viewHolderClickListener = new OnViewHolderClickListener();
     }
 
-    public String iStreamToString(InputStream is1)
+    public String iStreamToString(InputStream is)
     {
-        BufferedReader rd = new BufferedReader(new InputStreamReader(is1), 4096);
+        BufferedReader rd = new BufferedReader(new InputStreamReader(is), 4096);
         String line;
         StringBuilder sb =  new StringBuilder();
         try {
@@ -68,12 +81,25 @@ public class MainActivity extends AppCompatActivity {
             rd.close();
 
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         String contentOfMyInputStream = sb.toString();
         return contentOfMyInputStream;
     }
+
+    class OnViewHolderClickListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
+            TextView tvName = v.findViewById(R.id.tv_recipe_name);
+            int id = Integer.parseInt(tvName.getTag().toString());
+            intent.putExtra(EXTRA_RECIPE_ID, id);
+
+            startActivity(intent);
+        }
+    }
+
 
     public class FetchRecipeTask extends AsyncTask<Void, Void, String> {
 

@@ -37,26 +37,38 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeView
 
     @Override
     public void onBindViewHolder(RecipeViewHolder holder, int position) {
+        holder.mRecipeName.setText(mRecipes.get(position).getName());
+        holder.mRecipeServings.setText(String.valueOf(mRecipes.get(position).getServings()));
+        holder.mRecipePicture.setVisibility(View.GONE);
+        holder.mRecipeName.setTag(mRecipes.get(position).getId());
 
     }
 
     @Override
     public int getItemCount() {
+        if(mRecipes != null) {
+            return mRecipes.size();
+        }
         return 0;
     }
 
     class RecipeViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.iv_recipe_picture)
-        ImageView mRecipePictures;
+        ImageView mRecipePicture;
 
         @BindView(R.id.tv_recipe_name)
         TextView mRecipeName;
+
+        @BindView(R.id.tv_recipe_servings)
+        TextView mRecipeServings;
 
         public RecipeViewHolder(View itemView) {
             super(itemView);
 
             ButterKnife.bind(this, itemView);
+
+            itemView.setOnClickListener(MainActivity.viewHolderClickListener);
         }
     }
 }

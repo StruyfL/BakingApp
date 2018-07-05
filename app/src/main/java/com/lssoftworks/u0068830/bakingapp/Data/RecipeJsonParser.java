@@ -30,7 +30,7 @@ public class RecipeJsonParser {
     private static final String RECIPE_STEPS_VIDEOURL = "videoURL";
     private static final String RECIPE_STEPS_THUMBNAILURL = "thumbnailURL";
 
-    public static Recipe getRecipes(String recipeJsonString) throws JSONException {
+    public static Recipe[] getRecipes(String recipeJsonString) throws JSONException {
 
         JSONArray recipeArray = new JSONArray(recipeJsonString);
 
@@ -40,10 +40,52 @@ public class RecipeJsonParser {
             recipes[i] = new Recipe();
             JSONObject recipeObject = recipeArray.getJSONObject(i);
             recipes[i].setId(recipeObject.getInt(RECIPE_ID));
+            recipes[i].setName(recipeObject.getString(RECIPE_NAME));
+            recipes[i].setServings(recipeObject.getInt(RECIPE_SERVINGS));
+            recipes[i].setImage(recipeObject.getString(RECIPE_IMAGE));
+
+            JSONArray recipeIngredients = recipeObject.getJSONArray(RECIPE_INGREDIENTS);
+
+            String[] quantity = new String[recipeIngredients.length()];
+            String[] measure = new String[recipeIngredients.length()];
+            String[] ingredient = new String[recipeIngredients.length()];
+
+            for(int j = 0; j < recipeIngredients.length(); j++) {
+                JSONObject recipeIngredient = recipeIngredients.getJSONObject(j);
+                quantity[j] = recipeIngredient.getString(RECIPE_ING_QUANTITY);
+                measure[j] = recipeIngredient.getString(RECIPE_ING_MEASURE);
+                ingredient[j] = recipeIngredient.getString(RECIPE_ING_INGREDIENT);
+            }
+
+            JSONArray recipeSteps = recipeObject.getJSONArray(RECIPE_STEPS);
+
+            int[] id = new int[recipeSteps.length()];
+            String[] shortDescription = new String[recipeSteps.length()];
+            String[] description = new String[recipeSteps.length()];
+            String[] videoURL = new String[recipeSteps.length()];
+            String[] thumbnailURL = new String[recipeSteps.length()];
+
+            for(int j = 0; j < recipeSteps.length(); j++) {
+                JSONObject recipeStep = recipeSteps.getJSONObject(j);
+                id[j] = recipeStep.getInt(RECIPE_STEPS_ID);
+                shortDescription[j] = recipeStep.getString(RECIPE_STEPS_SHORTDESCRIPTION);
+                description[j] = recipeStep.getString(RECIPE_STEPS_DESCRIPTION);
+                videoURL[j] = recipeStep.getString(RECIPE_STEPS_VIDEOURL);
+                thumbnailURL[j] = recipeStep.getString(RECIPE_STEPS_THUMBNAILURL);
+            }
+
+            recipes[i].setQuantity(quantity);
+            recipes[i].setMeasure(measure);
+            recipes[i].setIngredient(ingredient);
+            recipes[i].setStepId(id);
+            recipes[i].setShortDescription(shortDescription);
+            recipes[i].setDescription(description);
+            recipes[i].setVideoURL(videoURL);
+            recipes[i].setThumbnailURL(thumbnailURL);
 
             Log.d(TAG, String.valueOf(recipes[i].getId()));
         }
 
-        return null;
+        return recipes;
     }
 }
