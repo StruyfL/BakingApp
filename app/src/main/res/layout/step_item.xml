@@ -13,20 +13,21 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <VideoView
-            android:id="@+id/vv_instructionvideo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+
+        <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+            android:id="@+id/ep_instructionvideo"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="gone"/>
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tv_stepid"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/vv_instructionvideo"
-            app:layout_constraintLeft_toLeftOf="@id/vv_instructionvideo"
+            app:layout_constraintTop_toBottomOf="@id/ep_instructionvideo"
+            app:layout_constraintLeft_toLeftOf="@id/ep_instructionvideo"
             tools:text="Step 1" />
 
         <TextView

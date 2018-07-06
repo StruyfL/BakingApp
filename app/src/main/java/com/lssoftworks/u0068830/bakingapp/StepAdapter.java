@@ -1,6 +1,7 @@
 package com.lssoftworks.u0068830.bakingapp;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,6 +9,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 import com.lssoftworks.u0068830.bakingapp.Data.Recipe;
 
 import java.util.ArrayList;
@@ -18,10 +32,12 @@ import butterknife.ButterKnife;
 public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder> {
 
     ArrayList<Recipe.Step> mStepsList;
+    SimpleExoPlayer mExoPlayer;
+    Context mContext;
 
-    public StepAdapter(ArrayList<Recipe.Step> steps) {
+    public StepAdapter(Context context, ArrayList<Recipe.Step> steps) {
         mStepsList = steps;
-        Log.d("StepAdapter", String.valueOf(mStepsList.size()));
+        mContext = context;
     }
 
     @Override
@@ -41,6 +57,18 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
         holder.mStepId.setText(String.valueOf(mStepsList.get(position).getStepId()));
         holder.mShortDesc.setText(mStepsList.get(position).getShortDescription());
         holder.mDesc.setText(mStepsList.get(position).getDescription());
+        String videoUrl = mStepsList.get(position).getVideoURL();
+
+        if(!videoUrl.equals("")) {
+            DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(mContext,
+                    Util.getUserAgent(mContext, "BakingApp"), bandwidthMeter);
+            MediaSource mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(videoUrl));
+
+            mExoPlayer.prepare(mediaSource);
+            mExoPlayer.setPlayWhenReady(false);
+        }
+
 
     }
 
@@ -55,6 +83,9 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
 
     class StepViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.ep_instructionvideo)
+        PlayerView mExoPlayerView;
+
         @BindView(R.id.tv_stepid)
         TextView mStepId;
 
@@ -68,6 +99,22 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
             super(itemView);
 
             ButterKnife.bind(this, itemView);
+
+            initializeExoPlayer();
+
+        }
+
+        void initializeExoPlayer() {
+            if(mExoPlayer == null) {
+                BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+
+                TrackSelection.Factory videoTrackSelection = new AdaptiveTrackSelection.Factory(bandwidthMeter);
+                DefaultTrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelection);
+
+                mExoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, trackSelector);
+
+                mExoPlayerView.setPlayer(mExoPlayer);
+            }
         }
     }
 }

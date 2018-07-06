@@ -76,7 +76,7 @@ public class DetailsActivity extends AppCompatActivity {
         mStepList.setLayoutManager(linearLayoutManager);
         mStepList.setHasFixedSize(true);
 
-        mAdapter = new StepAdapter(mSteps);
+        mAdapter = new StepAdapter(this, mSteps);
         mStepList.setAdapter(mAdapter);
 
     }
