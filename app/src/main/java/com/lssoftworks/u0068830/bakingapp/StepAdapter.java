@@ -31,13 +31,14 @@ import butterknife.ButterKnife;
 
 public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder> {
 
-    ArrayList<Recipe.Step> mStepsList;
-    SimpleExoPlayer mExoPlayer;
-    Context mContext;
+    private ArrayList<Recipe.Step> mStepsList;
+    private SimpleExoPlayer mExoPlayer;
+    private Context mContext;
 
-    public StepAdapter(Context context, ArrayList<Recipe.Step> steps) {
+    StepAdapter(Context context, ArrayList<Recipe.Step> steps, SimpleExoPlayer exoPlayer) {
         mStepsList = steps;
         mContext = context;
+        mExoPlayer = exoPlayer;
     }
 
     @Override
@@ -64,12 +65,12 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
             DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(mContext,
                     Util.getUserAgent(mContext, "BakingApp"), bandwidthMeter);
             MediaSource mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(videoUrl));
-
+            holder.mExoPlayerView.setPlayer(mExoPlayer);
             mExoPlayer.prepare(mediaSource);
             mExoPlayer.setPlayWhenReady(false);
+        } else {
+            holder.mExoPlayerView.setVisibility(View.GONE);
         }
-
-
     }
 
     @Override
@@ -79,6 +80,17 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
         }
 
         return 0;
+    }
+
+    void initializeExoPlayer() {
+        if(mExoPlayer == null) {
+            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+
+            TrackSelection.Factory videoTrackSelection = new AdaptiveTrackSelection.Factory(bandwidthMeter);
+            DefaultTrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelection);
+
+            mExoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, trackSelector);
+        }
     }
 
     class StepViewHolder extends RecyclerView.ViewHolder {
@@ -95,26 +107,11 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
         @BindView(R.id.tv_desc)
         TextView mDesc;
 
-        public StepViewHolder(View itemView) {
+        StepViewHolder(View itemView) {
             super(itemView);
 
             ButterKnife.bind(this, itemView);
 
-            initializeExoPlayer();
-
-        }
-
-        void initializeExoPlayer() {
-            if(mExoPlayer == null) {
-                BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-
-                TrackSelection.Factory videoTrackSelection = new AdaptiveTrackSelection.Factory(bandwidthMeter);
-                DefaultTrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelection);
-
-                mExoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, trackSelector);
-
-                mExoPlayerView.setPlayer(mExoPlayer);
-            }
         }
     }
 }

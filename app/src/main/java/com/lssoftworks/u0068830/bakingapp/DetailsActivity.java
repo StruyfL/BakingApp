@@ -9,6 +9,13 @@ import android.widget.Adapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.lssoftworks.u0068830.bakingapp.Data.Recipe;
 
 import java.lang.reflect.Array;
@@ -30,6 +37,7 @@ public class DetailsActivity extends AppCompatActivity {
     private String[] mIngredient;
     private StepAdapter mAdapter;
     private static ArrayList<Recipe.Step> mSteps;
+    private SimpleExoPlayer mExoPlayer;
 
     @BindView(R.id.tv_recipe_name)
     TextView mRecipeName;
@@ -76,8 +84,28 @@ public class DetailsActivity extends AppCompatActivity {
         mStepList.setLayoutManager(linearLayoutManager);
         mStepList.setHasFixedSize(true);
 
-        mAdapter = new StepAdapter(this, mSteps);
+        initializeExoPlayer();
+
+        mAdapter = new StepAdapter(this, mSteps, mExoPlayer);
         mStepList.setAdapter(mAdapter);
 
+    }
+
+    void initializeExoPlayer() {
+        if(mExoPlayer == null) {
+            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+
+            TrackSelection.Factory videoTrackSelection = new AdaptiveTrackSelection.Factory(bandwidthMeter);
+            DefaultTrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelection);
+
+            mExoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mExoPlayer.release();
     }
 }
