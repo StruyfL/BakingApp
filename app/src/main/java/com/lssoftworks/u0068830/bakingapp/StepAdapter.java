@@ -9,15 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
@@ -33,12 +28,12 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
 
     private ArrayList<Recipe.Step> mStepsList;
     private SimpleExoPlayer mExoPlayer;
-    private Context mContext;
+    private ArrayList<MediaSource> mMediaSource;
 
-    StepAdapter(Context context, ArrayList<Recipe.Step> steps, SimpleExoPlayer exoPlayer) {
+    StepAdapter(ArrayList<Recipe.Step> steps, SimpleExoPlayer exoPlayer, ArrayList<MediaSource> mediaSource) {
         mStepsList = steps;
-        mContext = context;
         mExoPlayer = exoPlayer;
+        mMediaSource = mediaSource;
     }
 
     @Override
@@ -59,14 +54,12 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
         holder.mShortDesc.setText(mStepsList.get(position).getShortDescription());
         holder.mDesc.setText(mStepsList.get(position).getDescription());
         String videoUrl = mStepsList.get(position).getVideoURL();
+        Log.d("VideoURL:", String.valueOf(position) + " " + videoUrl);
 
         if(!videoUrl.equals("")) {
-            DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(mContext,
-                    Util.getUserAgent(mContext, "BakingApp"), bandwidthMeter);
-            MediaSource mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(videoUrl));
+            holder.mExoPlayerView.setVisibility(View.VISIBLE);
             holder.mExoPlayerView.setPlayer(mExoPlayer);
-            mExoPlayer.prepare(mediaSource);
+            mExoPlayer.prepare(mMediaSource.get(position));
             mExoPlayer.setPlayWhenReady(false);
         } else {
             holder.mExoPlayerView.setVisibility(View.GONE);
@@ -80,17 +73,6 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
         }
 
         return 0;
-    }
-
-    void initializeExoPlayer() {
-        if(mExoPlayer == null) {
-            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-
-            TrackSelection.Factory videoTrackSelection = new AdaptiveTrackSelection.Factory(bandwidthMeter);
-            DefaultTrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelection);
-
-            mExoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, trackSelector);
-        }
     }
 
     class StepViewHolder extends RecyclerView.ViewHolder {

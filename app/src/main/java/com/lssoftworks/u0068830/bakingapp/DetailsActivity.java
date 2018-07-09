@@ -1,31 +1,34 @@
 package com.lssoftworks.u0068830.bakingapp;
 
 import android.content.Intent;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.widget.Adapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 import com.lssoftworks.u0068830.bakingapp.Data.Recipe;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.lssoftworks.u0068830.bakingapp.MainActivity.EXTRA_RECIPES;
 import static com.lssoftworks.u0068830.bakingapp.MainActivity.EXTRA_RECIPE_ID;
 import static com.lssoftworks.u0068830.bakingapp.MainActivity.mRecipes;
 
@@ -38,6 +41,9 @@ public class DetailsActivity extends AppCompatActivity {
     private StepAdapter mAdapter;
     private static ArrayList<Recipe.Step> mSteps;
     private SimpleExoPlayer mExoPlayer;
+    private DefaultBandwidthMeter mBandwidthMeter;
+    private DataSource.Factory mDataSourceFactory;
+    private ArrayList<MediaSource> mMediaSource = new ArrayList<>();
 
     @BindView(R.id.tv_recipe_name)
     TextView mRecipeName;
@@ -86,19 +92,26 @@ public class DetailsActivity extends AppCompatActivity {
 
         initializeExoPlayer();
 
-        mAdapter = new StepAdapter(this, mSteps, mExoPlayer);
+        mAdapter = new StepAdapter(mSteps, mExoPlayer, mMediaSource);
         mStepList.setAdapter(mAdapter);
 
     }
 
     void initializeExoPlayer() {
         if(mExoPlayer == null) {
-            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+            mBandwidthMeter = new DefaultBandwidthMeter();
 
-            TrackSelection.Factory videoTrackSelection = new AdaptiveTrackSelection.Factory(bandwidthMeter);
+            TrackSelection.Factory videoTrackSelection = new AdaptiveTrackSelection.Factory(mBandwidthMeter);
             DefaultTrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelection);
 
             mExoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
+
+            mDataSourceFactory = new DefaultDataSourceFactory(this,
+                    Util.getUserAgent(this, "BakingApp"), mBandwidthMeter);
+
+            for(int i = 0; i < mSteps.size(); i++) {
+                mMediaSource.add(new ExtractorMediaSource.Factory(mDataSourceFactory).createMediaSource(Uri.parse(mSteps.get(i).getVideoURL())));
+            }
         }
     }
 

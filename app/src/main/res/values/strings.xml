@@ -10,4 +10,8 @@
     <string name="ingredient_quantity">100</string>
     <string name="ingredient_measure">TBLSPN</string>
     <string name="ingredient_name">Ingredient Name</string>
+
+    <!-- Strings for the widget -->
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>
