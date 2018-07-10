@@ -1,5 +1,7 @@
 package com.lssoftworks.u0068830.bakingapp;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -7,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -113,6 +116,13 @@ public class DetailsActivity extends AppCompatActivity {
                 mMediaSource.add(new ExtractorMediaSource.Factory(mDataSourceFactory).createMediaSource(Uri.parse(mSteps.get(i).getVideoURL())));
             }
         }
+    }
+
+    public void RecipeToWidget(View v) {
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this, RecipeWidget.class));
+        //Now update all widgets
+        RecipeWidget.updateRecipeWidgets(this, appWidgetManager, mRecipe, appWidgetIds);
     }
 
     @Override
