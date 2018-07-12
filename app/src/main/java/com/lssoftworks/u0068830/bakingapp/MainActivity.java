@@ -2,106 +2,65 @@ package com.lssoftworks.u0068830.bakingapp;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
 import com.lssoftworks.u0068830.bakingapp.Data.Recipe;
 import com.lssoftworks.u0068830.bakingapp.Network.NetworkUtils;
 
-import org.json.JSONException;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
-import static com.lssoftworks.u0068830.bakingapp.Data.RecipeJsonParser.getRecipes;
+import static com.lssoftworks.u0068830.bakingapp.MainFragment.mRecipes;
 
 public class MainActivity extends AppCompatActivity {
 
-    @BindView(R.id.rv_baking_recipes)
-    RecyclerView mBakingRecipes;
 
-    private RecipeAdapter mAdapter;
-    public static ArrayList<Recipe> mRecipes;
     private String mRecipeJson;
-    public static OnViewHolderClickListener viewHolderClickListener;
     private static final String TAG = MainActivity.class.getSimpleName();
-    public static final String EXTRA_RECIPES = "all_recipes";
     public static final String EXTRA_RECIPE_ID = "recipe_id";
+    public static DetailsFragment mDetailsFragment;
+    public static FragmentManager mFragmentManager;
+
+    private boolean mTwoPane;
+    private Recipe mRecipe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ButterKnife.bind(this);
+        if(findViewById(R.id.ll_recipe_two_pane) != null) {
+            mTwoPane = true;
 
-        InputStream is = getResources().openRawResource(R.raw.baking);
-        String bakingData = iStreamToString(is);
+            Intent intent = getIntent();
 
-        try {
-            mRecipes = new ArrayList<>(Arrays.asList(getRecipes(bakingData)));
-        } catch (JSONException e) {
-            e.printStackTrace();
+            int id = intent.getIntExtra(EXTRA_RECIPE_ID, 1);
+
+            mRecipe = mRecipes.get(id-1);
+
+            mDetailsFragment = new DetailsFragment();
+            mDetailsFragment.setRecipe(mRecipe);
+            mDetailsFragment.setContext(this);
+
+            mFragmentManager = getSupportFragmentManager();
+
+            mFragmentManager.beginTransaction()
+                    .replace(R.id.details_container, mDetailsFragment)
+                    .commit();
+
+        } else {
+            mTwoPane = false;
         }
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        mBakingRecipes.setLayoutManager(linearLayoutManager);
-        mBakingRecipes.setHasFixedSize(true);
-
-        mAdapter = new RecipeAdapter(mRecipes);
-        mBakingRecipes.setAdapter(mAdapter);
-
-        viewHolderClickListener = new OnViewHolderClickListener();
+        MainFragment.setTwoPane(mTwoPane);
     }
 
-    public String iStreamToString(InputStream is)
-    {
-        BufferedReader rd = new BufferedReader(new InputStreamReader(is), 4096);
-        String line;
-        StringBuilder sb =  new StringBuilder();
-        try {
-            while ((line = rd.readLine()) != null) {
-                sb.append(line);
-            }
-            rd.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String contentOfMyInputStream = sb.toString();
-        return contentOfMyInputStream;
-    }
-
-    class OnViewHolderClickListener implements View.OnClickListener {
-
-        @Override
-        public void onClick(View v) {
-            Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
-            TextView tvName = v.findViewById(R.id.tv_recipe_name);
-            int id = Integer.parseInt(tvName.getTag().toString());
-            intent.putExtra(EXTRA_RECIPE_ID, id);
-
-            startActivity(intent);
-        }
-    }
-
-
-    public class FetchRecipeTask extends AsyncTask<Void, Void, String> {
+    class FetchRecipeTask extends AsyncTask<Void, Void, String> {
 
         @Override
         protected String doInBackground(Void... voids) {

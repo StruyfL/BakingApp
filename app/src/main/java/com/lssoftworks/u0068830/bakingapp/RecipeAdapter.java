@@ -41,7 +41,6 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeView
         holder.mRecipeServings.setText(String.valueOf(mRecipes.get(position).getServings()));
         holder.mRecipePicture.setVisibility(View.GONE);
         holder.mRecipeName.setTag(mRecipes.get(position).getId());
-
     }
 
     @Override
@@ -68,7 +67,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeView
 
             ButterKnife.bind(this, itemView);
 
-            itemView.setOnClickListener(MainActivity.viewHolderClickListener);
+            itemView.setOnClickListener(MainFragment.viewHolderClickListener);
         }
     }
 }
