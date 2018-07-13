@@ -35,6 +35,7 @@ public class MainFragment extends Fragment {
     public static MainFragment.OnViewHolderClickListener viewHolderClickListener;
     private static boolean mTwoPane;
     private Recipe mRecipe;
+    private int recipeId;
 
     public static final String EXTRA_RECIPE_ID = "recipe_id";
 
@@ -99,14 +100,14 @@ public class MainFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            Intent intent = new Intent(getContext(), DetailsActivity.class);
             TextView tvName = v.findViewById(R.id.tv_recipe_name);
-            int id = Integer.parseInt(tvName.getTag().toString());
+            recipeId = Integer.parseInt(tvName.getTag().toString());
             if(mTwoPane == false) {
-                intent.putExtra(EXTRA_RECIPE_ID, id);
+                Intent intent = new Intent(getContext(), DetailsActivity.class);
+                intent.putExtra(EXTRA_RECIPE_ID, recipeId);
                 startActivity(intent);
             } else {
-                mRecipe = mRecipes.get(id-1);
+                mRecipe = mRecipes.get(recipeId-1);
 
                 mDetailsFragment = new DetailsFragment();
                 mDetailsFragment.setRecipe(mRecipe);

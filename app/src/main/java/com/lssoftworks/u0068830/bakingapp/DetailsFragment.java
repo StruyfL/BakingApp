@@ -3,6 +3,7 @@ package com.lssoftworks.u0068830.bakingapp;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -43,8 +44,9 @@ public class DetailsFragment extends Fragment {
     private DefaultBandwidthMeter mBandwidthMeter;
     private DataSource.Factory mDataSourceFactory;
     private ArrayList<MediaSource> mMediaSource = new ArrayList<>();
-
     private Context mContext;
+
+    private static final String STEPSLIST_POSITION = "stepslist_position";
 
     @BindView(R.id.tv_recipe_name)
     TextView mRecipeName;
@@ -95,10 +97,26 @@ public class DetailsFragment extends Fragment {
 
             mAdapter = new StepAdapter(mSteps, mExoPlayer, mMediaSource);
             mStepList.setAdapter(mAdapter);
+
+            if(savedInstanceState != null) {
+                Parcelable savedRvInstanceState = savedInstanceState.getParcelable(STEPSLIST_POSITION);
+                mStepList.getLayoutManager().onRestoreInstanceState(savedRvInstanceState);
+            }
         }
 
         return rootView;
     }
+
+    //@Override
+    //public void onViewStateRestored(Bundle savedInstanceState) {
+
+        //if(savedInstanceState != null) {
+        //    Parcelable savedRvInstanceState = savedInstanceState.getParcelable(STEPSLIST_POSITION);
+        //    mStepList.getLayoutManager().onRestoreInstanceState(savedRvInstanceState);
+        //}
+
+    //    super.onViewStateRestored(savedInstanceState);
+    //}
 
     void initializeExoPlayer() {
         if(mExoPlayer == null) {
@@ -124,6 +142,13 @@ public class DetailsFragment extends Fragment {
 
     public void setContext(Context context) {
         mContext = context;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable(STEPSLIST_POSITION, mStepList.getLayoutManager().onSaveInstanceState());
+
+        super.onSaveInstanceState(outState);
     }
 
     @Override

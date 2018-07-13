@@ -23,11 +23,14 @@ public class MainActivity extends AppCompatActivity {
     private String mRecipeJson;
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final String EXTRA_RECIPE_ID = "recipe_id";
+    private static final String RECIPE_ID = "recipe_id";
+
     public static DetailsFragment mDetailsFragment;
     public static FragmentManager mFragmentManager;
 
     private boolean mTwoPane;
     private Recipe mRecipe;
+    private int recipeId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,11 +40,15 @@ public class MainActivity extends AppCompatActivity {
         if(findViewById(R.id.ll_recipe_two_pane) != null) {
             mTwoPane = true;
 
-            Intent intent = getIntent();
+            if(savedInstanceState == null) {
+                Intent intent = getIntent();
 
-            int id = intent.getIntExtra(EXTRA_RECIPE_ID, 1);
+                recipeId = intent.getIntExtra(EXTRA_RECIPE_ID, 1);
+            } else {
+                recipeId = savedInstanceState.getInt(RECIPE_ID);
+            }
 
-            mRecipe = mRecipes.get(id-1);
+            mRecipe = mRecipes.get(recipeId-1);
 
             mDetailsFragment = new DetailsFragment();
             mDetailsFragment.setRecipe(mRecipe);
@@ -58,6 +65,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         MainFragment.setTwoPane(mTwoPane);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        
+        outState.putInt(RECIPE_ID, recipeId);
     }
 
     class FetchRecipeTask extends AsyncTask<Void, Void, String> {
