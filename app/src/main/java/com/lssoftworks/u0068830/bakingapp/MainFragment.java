@@ -101,13 +101,13 @@ public class MainFragment extends Fragment {
         @Override
         public void onClick(View v) {
             TextView tvName = v.findViewById(R.id.tv_recipe_name);
-            recipeId = Integer.parseInt(tvName.getTag().toString());
-            if(mTwoPane == false) {
+            MainActivity.mRecipeId = Integer.parseInt(tvName.getTag().toString());
+            if(!mTwoPane) {
                 Intent intent = new Intent(getContext(), DetailsActivity.class);
                 intent.putExtra(EXTRA_RECIPE_ID, recipeId);
                 startActivity(intent);
             } else {
-                mRecipe = mRecipes.get(recipeId-1);
+                mRecipe = mRecipes.get(MainActivity.mRecipeId);
 
                 mDetailsFragment = new DetailsFragment();
                 mDetailsFragment.setRecipe(mRecipe);

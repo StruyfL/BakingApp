@@ -7,6 +7,7 @@ import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,8 @@ import java.util.Arrays;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.lssoftworks.u0068830.bakingapp.MainActivity.mRecipeId;
+
 public class DetailsFragment extends Fragment {
 
     private static Recipe mRecipe;
@@ -47,6 +50,8 @@ public class DetailsFragment extends Fragment {
     private Context mContext;
 
     private static final String STEPSLIST_POSITION = "stepslist_position";
+    private static final String RECIPE_ID = "recipe_id";
+    private static final String TAG = DetailsFragment.class.getSimpleName();
 
     @BindView(R.id.tv_recipe_name)
     TextView mRecipeName;
@@ -67,6 +72,13 @@ public class DetailsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_details, container, false);
 
         ButterKnife.bind(DetailsFragment.this, rootView);
+
+        if(savedInstanceState != null) {
+            mRecipeId = savedInstanceState.getInt(RECIPE_ID);
+            mRecipe = MainFragment.mRecipes.get(mRecipeId);
+
+            Log.d(TAG, String.valueOf(mRecipeId));
+        }
 
         if(mRecipe != null && mContext != null) {
 
@@ -107,17 +119,6 @@ public class DetailsFragment extends Fragment {
         return rootView;
     }
 
-    //@Override
-    //public void onViewStateRestored(Bundle savedInstanceState) {
-
-        //if(savedInstanceState != null) {
-        //    Parcelable savedRvInstanceState = savedInstanceState.getParcelable(STEPSLIST_POSITION);
-        //    mStepList.getLayoutManager().onRestoreInstanceState(savedRvInstanceState);
-        //}
-
-    //    super.onViewStateRestored(savedInstanceState);
-    //}
-
     void initializeExoPlayer() {
         if(mExoPlayer == null) {
             mBandwidthMeter = new DefaultBandwidthMeter();
@@ -147,6 +148,7 @@ public class DetailsFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putParcelable(STEPSLIST_POSITION, mStepList.getLayoutManager().onSaveInstanceState());
+        outState.putInt(RECIPE_ID, mRecipeId);
 
         super.onSaveInstanceState(outState);
     }

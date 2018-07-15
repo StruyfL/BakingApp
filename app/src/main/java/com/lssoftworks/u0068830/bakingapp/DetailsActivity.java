@@ -17,7 +17,7 @@ public class DetailsActivity extends AppCompatActivity {
 
     private static final String RECIPE_ID = "recipe_id";
     private static Recipe mRecipe;
-    private int id;
+    private int recipeId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,12 +27,12 @@ public class DetailsActivity extends AppCompatActivity {
         if(savedInstanceState == null) {
             Intent intent = getIntent();
 
-            id = intent.getIntExtra(EXTRA_RECIPE_ID, 1);
+            recipeId = intent.getIntExtra(EXTRA_RECIPE_ID, 1);
         } else {
-            id = savedInstanceState.getInt(RECIPE_ID);
+            recipeId = savedInstanceState.getInt(RECIPE_ID);
         }
 
-        mRecipe = mRecipes.get(id-1);
+        mRecipe = mRecipes.get(recipeId-1);
 
         DetailsFragment detailsFragment = new DetailsFragment();
         detailsFragment.setRecipe(mRecipe);
@@ -54,7 +54,7 @@ public class DetailsActivity extends AppCompatActivity {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(RECIPE_ID, id);
+        outState.putInt(RECIPE_ID, recipeId);
 
         super.onSaveInstanceState(outState);
     }

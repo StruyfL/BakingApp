@@ -24,13 +24,14 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final String EXTRA_RECIPE_ID = "recipe_id";
     private static final String RECIPE_ID = "recipe_id";
+    private static final String DETAILS_FRAGMENT_STATE = "details_fragment_state";
 
     public static DetailsFragment mDetailsFragment;
     public static FragmentManager mFragmentManager;
 
     private boolean mTwoPane;
     private Recipe mRecipe;
-    private int recipeId;
+    public static int mRecipeId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,16 +42,16 @@ public class MainActivity extends AppCompatActivity {
             mTwoPane = true;
 
             if(savedInstanceState == null) {
-                Intent intent = getIntent();
-
-                recipeId = intent.getIntExtra(EXTRA_RECIPE_ID, 1);
+                mDetailsFragment = new DetailsFragment();
             } else {
-                recipeId = savedInstanceState.getInt(RECIPE_ID);
+                mRecipeId = savedInstanceState.getInt(RECIPE_ID);
+                mDetailsFragment = (DetailsFragment) getSupportFragmentManager().getFragment(savedInstanceState, DETAILS_FRAGMENT_STATE);
             }
 
-            mRecipe = mRecipes.get(recipeId-1);
+            mRecipe = mRecipes.get(mRecipeId);
 
-            mDetailsFragment = new DetailsFragment();
+            Log.d(TAG, String.valueOf(mRecipeId));
+
             mDetailsFragment.setRecipe(mRecipe);
             mDetailsFragment.setContext(this);
 
@@ -70,8 +71,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        
-        outState.putInt(RECIPE_ID, recipeId);
+
+        getSupportFragmentManager().putFragment(outState, DETAILS_FRAGMENT_STATE, mDetailsFragment);
+        outState.putInt(RECIPE_ID, mRecipeId);
     }
 
     class FetchRecipeTask extends AsyncTask<Void, Void, String> {

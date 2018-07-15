@@ -39,7 +39,7 @@ public class RecipeJsonParser {
         for(int i = 0; i < recipeArray.length(); i++) {
             recipes[i] = new Recipe();
             JSONObject recipeObject = recipeArray.getJSONObject(i);
-            recipes[i].setId(recipeObject.getInt(RECIPE_ID));
+            recipes[i].setId(recipeObject.getInt(RECIPE_ID)-1);
             recipes[i].setName(recipeObject.getString(RECIPE_NAME));
             recipes[i].setServings(recipeObject.getInt(RECIPE_SERVINGS));
             recipes[i].setImage(recipeObject.getString(RECIPE_IMAGE));
