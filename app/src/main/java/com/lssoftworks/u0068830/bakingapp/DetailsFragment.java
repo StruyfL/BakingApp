@@ -76,8 +76,6 @@ public class DetailsFragment extends Fragment {
         if(savedInstanceState != null) {
             mRecipeId = savedInstanceState.getInt(RECIPE_ID);
             mRecipe = MainFragment.mRecipes.get(mRecipeId);
-
-            Log.d(TAG, String.valueOf(mRecipeId));
         }
 
         if(mRecipe != null && mContext != null) {
@@ -147,7 +145,9 @@ public class DetailsFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelable(STEPSLIST_POSITION, mStepList.getLayoutManager().onSaveInstanceState());
+        if(mStepList != null) {
+            outState.putParcelable(STEPSLIST_POSITION, mStepList.getLayoutManager().onSaveInstanceState());
+        }
         outState.putInt(RECIPE_ID, mRecipeId);
 
         super.onSaveInstanceState(outState);

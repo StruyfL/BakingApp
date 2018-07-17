@@ -32,7 +32,7 @@ public class DetailsActivity extends AppCompatActivity {
             recipeId = savedInstanceState.getInt(RECIPE_ID);
         }
 
-        mRecipe = mRecipes.get(recipeId-1);
+        mRecipe = mRecipes.get(recipeId);
 
         DetailsFragment detailsFragment = new DetailsFragment();
         detailsFragment.setRecipe(mRecipe);

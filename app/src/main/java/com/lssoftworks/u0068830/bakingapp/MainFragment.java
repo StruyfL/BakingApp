@@ -27,6 +27,7 @@ import butterknife.ButterKnife;
 
 import static com.lssoftworks.u0068830.bakingapp.Data.RecipeJsonParser.getRecipes;
 import static com.lssoftworks.u0068830.bakingapp.MainActivity.mDetailsFragment;
+import static com.lssoftworks.u0068830.bakingapp.MainActivity.mRecipeId;
 
 public class MainFragment extends Fragment {
 
@@ -35,7 +36,6 @@ public class MainFragment extends Fragment {
     public static MainFragment.OnViewHolderClickListener viewHolderClickListener;
     private static boolean mTwoPane;
     private Recipe mRecipe;
-    private int recipeId;
 
     public static final String EXTRA_RECIPE_ID = "recipe_id";
 
@@ -104,7 +104,7 @@ public class MainFragment extends Fragment {
             MainActivity.mRecipeId = Integer.parseInt(tvName.getTag().toString());
             if(!mTwoPane) {
                 Intent intent = new Intent(getContext(), DetailsActivity.class);
-                intent.putExtra(EXTRA_RECIPE_ID, recipeId);
+                intent.putExtra(EXTRA_RECIPE_ID, mRecipeId);
                 startActivity(intent);
             } else {
                 mRecipe = mRecipes.get(MainActivity.mRecipeId);

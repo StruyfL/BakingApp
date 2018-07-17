@@ -16,6 +16,7 @@ import java.net.Socket;
 import java.net.URL;
 
 import static com.lssoftworks.u0068830.bakingapp.MainFragment.mRecipes;
+import static com.lssoftworks.u0068830.bakingapp.MainFragment.setTwoPane;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         if(findViewById(R.id.ll_recipe_two_pane) != null) {
             mTwoPane = true;
 
@@ -49,8 +51,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             mRecipe = mRecipes.get(mRecipeId);
-
-            Log.d(TAG, String.valueOf(mRecipeId));
 
             mDetailsFragment.setRecipe(mRecipe);
             mDetailsFragment.setContext(this);
@@ -72,7 +72,9 @@ public class MainActivity extends AppCompatActivity {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        getSupportFragmentManager().putFragment(outState, DETAILS_FRAGMENT_STATE, mDetailsFragment);
+        if(mTwoPane) {
+            getSupportFragmentManager().putFragment(outState, DETAILS_FRAGMENT_STATE, mDetailsFragment);
+        }
         outState.putInt(RECIPE_ID, mRecipeId);
     }
 
