@@ -76,7 +76,7 @@ public class RecipeJsonParser {
             recipes[i].setIngredient(ingredient);
             recipes[i].setSteps(steps);
 
-            Log.d(TAG, String.valueOf(recipes[i].getId()));
+            Log.d(TAG, recipes[i].getName());
         }
 
         return recipes;

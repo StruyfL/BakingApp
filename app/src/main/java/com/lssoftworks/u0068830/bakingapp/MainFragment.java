@@ -28,11 +28,12 @@ import butterknife.ButterKnife;
 import static com.lssoftworks.u0068830.bakingapp.Data.RecipeJsonParser.getRecipes;
 import static com.lssoftworks.u0068830.bakingapp.MainActivity.mDetailsFragment;
 import static com.lssoftworks.u0068830.bakingapp.MainActivity.mRecipeId;
+import static com.lssoftworks.u0068830.bakingapp.MainActivity.mRecipes;
 
 public class MainFragment extends Fragment {
 
     private RecipeAdapter mAdapter;
-    public static ArrayList<Recipe> mRecipes;
+
     public static MainFragment.OnViewHolderClickListener viewHolderClickListener;
     private static boolean mTwoPane;
     private Recipe mRecipe;
@@ -53,15 +54,6 @@ public class MainFragment extends Fragment {
 
         ButterKnife.bind(this, rootView);
 
-        InputStream is = getResources().openRawResource(R.raw.baking);
-        String bakingData = iStreamToString(is);
-
-        try {
-            mRecipes = new ArrayList<>(Arrays.asList(getRecipes(bakingData)));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         mBakingRecipes.setLayoutManager(linearLayoutManager);
         mBakingRecipes.setHasFixedSize(true);
@@ -72,24 +64,6 @@ public class MainFragment extends Fragment {
         viewHolderClickListener = new OnViewHolderClickListener();
 
         return rootView;
-    }
-
-    public String iStreamToString(InputStream is)
-    {
-        BufferedReader rd = new BufferedReader(new InputStreamReader(is), 4096);
-        String line;
-        StringBuilder sb =  new StringBuilder();
-        try {
-            while ((line = rd.readLine()) != null) {
-                sb.append(line);
-            }
-            rd.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String contentOfMyInputStream = sb.toString();
-        return contentOfMyInputStream;
     }
 
     public static void setTwoPane(boolean twoPane) {
@@ -112,9 +86,9 @@ public class MainFragment extends Fragment {
                 mDetailsFragment = new DetailsFragment();
                 mDetailsFragment.setRecipe(mRecipe);
                 mDetailsFragment.setContext(getContext());
-                MainActivity.mFragmentManager.beginTransaction()
-                        .replace(R.id.details_container, mDetailsFragment)
-                        .commit();
+                //MainActivity.mFragmentManager.beginTransaction()
+                //        .replace(R.id.details_container, mDetailsFragment)
+                //        .commit();
             }
         }
     }

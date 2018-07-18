@@ -12,7 +12,7 @@ import java.util.Scanner;
 
 public class NetworkUtils {
 
-    private static final String RECIPE_BASE_URL = "http://go.udacity.com/android-baking-app-json";
+    private static final String RECIPE_BASE_URL = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
     public static URL buildUrl() {
@@ -38,7 +38,7 @@ public class NetworkUtils {
             Scanner scanner = new Scanner(in);
             scanner.useDelimiter("\\A");
 
-            boolean hasInput = scanner.hasNext();
+            boolean hasInput = scanner.hasNextLine();
             if (hasInput) {
                 return scanner.next();
             } else {

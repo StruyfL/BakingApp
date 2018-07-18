@@ -6,18 +6,23 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.lssoftworks.u0068830.bakingapp.Data.Recipe;
 
 import static com.lssoftworks.u0068830.bakingapp.MainActivity.EXTRA_RECIPE_ID;
-import static com.lssoftworks.u0068830.bakingapp.MainFragment.mRecipes;
 
 public class DetailsActivity extends AppCompatActivity {
 
-    private static final String RECIPE_ID = "recipe_id";
+    private static final String TAG = DetailsActivity.class.getSimpleName();
+    private static final String STEP_ID = "step_id";
     private static Recipe mRecipe;
     private int recipeId;
+    private int mStepId;
+    private static boolean mTwoPane;
+    public static OnStepViewHolderClickListener stepViewHolderClickListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,22 +32,81 @@ public class DetailsActivity extends AppCompatActivity {
         if(savedInstanceState == null) {
             Intent intent = getIntent();
 
-            recipeId = intent.getIntExtra(EXTRA_RECIPE_ID, 1);
+            recipeId = intent.getIntExtra(EXTRA_RECIPE_ID, 0);
+            mStepId = 0;
         } else {
-            recipeId = savedInstanceState.getInt(RECIPE_ID);
+            mStepId = savedInstanceState.getInt(STEP_ID);
         }
 
-        mRecipe = mRecipes.get(recipeId);
+        mRecipe = MainActivity.mRecipes.get(recipeId);
 
-        DetailsFragment detailsFragment = new DetailsFragment();
-        detailsFragment.setRecipe(mRecipe);
-        detailsFragment.setContext(this);
+        if(findViewById(R.id.ll_recipe_two_pane) != null) {
+            mTwoPane = true;
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
+            //if(savedInstanceState == null) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
 
-        fragmentManager.beginTransaction()
-                .add(R.id.details_container, detailsFragment)
-                .commit();
+                DetailsStepFragment detailsStepFragment = new DetailsStepFragment();
+                DetailsStepsFragment detailsStepsFragment = new DetailsStepsFragment();
+
+
+                detailsStepsFragment.setRecipe(mRecipe);
+                detailsStepsFragment.setContext(this);
+
+                detailsStepFragment.setStep(mRecipe.getSteps()[mStepId]);
+                detailsStepFragment.setContext(this);
+
+                fragmentManager.beginTransaction()
+                        .add(R.id.main_recipe_fragment, detailsStepsFragment)
+                        .add(R.id.step_fragment, detailsStepFragment)
+                        .commit();
+
+                stepViewHolderClickListener = new OnStepViewHolderClickListener();
+            //} else {
+                //mRecipeId = savedInstanceState.getInt(RECIPE_ID);
+                //mDetailsFragment = (DetailsFragment) getSupportFragmentManager().getFragment(savedInstanceState, DETAILS_FRAGMENT_STATE);
+            //}
+
+        } else {
+            mTwoPane = false;
+
+            //if(savedInstanceState == null) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+
+                DetailsFragment detailsFragment = new DetailsFragment();
+
+                detailsFragment.setRecipe(mRecipe);
+                detailsFragment.setContext(this);
+
+                fragmentManager.beginTransaction()
+                        .add(R.id.details_container, detailsFragment)
+                        .commit();
+            //} else {
+                //mRecipeId = savedInstanceState.getInt(RECIPE_ID);
+                //mDetailsFragment = (DetailsFragment) getSupportFragmentManager().getFragment(savedInstanceState, DETAILS_FRAGMENT_STATE);
+            //}
+        }
+    }
+
+    class OnStepViewHolderClickListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            TextView tvShortDesc = v.findViewById(R.id.tv_short_desc);
+            mStepId = Integer.parseInt(tvShortDesc.getTag().toString());
+
+            DetailsStepFragment detailsStepFragment = new DetailsStepFragment();
+
+            detailsStepFragment.setContext(DetailsActivity.this);
+            detailsStepFragment.setStep(mRecipe.getSteps()[mStepId]);
+
+            Log.d(TAG, "ID: " + mStepId);
+
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.step_fragment, detailsStepFragment)
+                    .commit();
+        }
     }
 
     public void RecipeToWidget(View v) {
@@ -54,7 +118,7 @@ public class DetailsActivity extends AppCompatActivity {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(RECIPE_ID, recipeId);
+        outState.putInt(STEP_ID, mStepId);
 
         super.onSaveInstanceState(outState);
     }

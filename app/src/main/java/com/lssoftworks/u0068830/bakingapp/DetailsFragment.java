@@ -34,6 +34,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.lssoftworks.u0068830.bakingapp.MainActivity.mRecipeId;
+import static com.lssoftworks.u0068830.bakingapp.MainActivity.mRecipes;
 
 public class DetailsFragment extends Fragment {
 
@@ -48,6 +49,8 @@ public class DetailsFragment extends Fragment {
     private DataSource.Factory mDataSourceFactory;
     private ArrayList<MediaSource> mMediaSource = new ArrayList<>();
     private Context mContext;
+    private RecyclerView.LayoutManager mLinearLayoutManager;
+    private Parcelable layoutManagerSavedState;
 
     private static final String STEPSLIST_POSITION = "stepslist_position";
     private static final String RECIPE_ID = "recipe_id";
@@ -69,14 +72,11 @@ public class DetailsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
+        Log.d(TAG, "Calling onCreateView");
+
         View rootView = inflater.inflate(R.layout.fragment_details, container, false);
 
         ButterKnife.bind(DetailsFragment.this, rootView);
-
-        if(savedInstanceState != null) {
-            mRecipeId = savedInstanceState.getInt(RECIPE_ID);
-            mRecipe = MainFragment.mRecipes.get(mRecipeId);
-        }
 
         if(mRecipe != null && mContext != null) {
 
@@ -99,19 +99,22 @@ public class DetailsFragment extends Fragment {
                 mIngredientList.addView(ingredientLayout);
             }
 
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false);
-            mStepList.setLayoutManager(linearLayoutManager);
+            mLinearLayoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false);
+            mStepList.setLayoutManager(mLinearLayoutManager);
             mStepList.setHasFixedSize(true);
+
+            if(savedInstanceState != null) {
+                mStepList.getLayoutManager().onRestoreInstanceState(layoutManagerSavedState);
+            } else {
+
+            }
 
             initializeExoPlayer();
 
             mAdapter = new StepAdapter(mSteps, mExoPlayer, mMediaSource);
             mStepList.setAdapter(mAdapter);
 
-            if(savedInstanceState != null) {
-                Parcelable savedRvInstanceState = savedInstanceState.getParcelable(STEPSLIST_POSITION);
-                mStepList.getLayoutManager().onRestoreInstanceState(savedRvInstanceState);
-            }
+
         }
 
         return rootView;
@@ -145,12 +148,19 @@ public class DetailsFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        if(mStepList != null) {
-            outState.putParcelable(STEPSLIST_POSITION, mStepList.getLayoutManager().onSaveInstanceState());
-        }
-        outState.putInt(RECIPE_ID, mRecipeId);
-
         super.onSaveInstanceState(outState);
+
+        outState.putParcelable(STEPSLIST_POSITION, mStepList.getLayoutManager().onSaveInstanceState());
+        //outState.putParcelable(STEPSLIST_POSITION, mLinearLayoutManager.onSaveInstanceState());
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if(savedInstanceState != null) {
+            layoutManagerSavedState = savedInstanceState.getParcelable(STEPSLIST_POSITION);
+        }
     }
 
     @Override

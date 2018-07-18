@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.lssoftworks.u0068830.bakingapp.Data.Recipe;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -67,7 +68,12 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeView
 
             ButterKnife.bind(this, itemView);
 
-            itemView.setOnClickListener(MainFragment.viewHolderClickListener);
+            itemView.setOnClickListener(MainActivity.viewHolderClickListener);
         }
+    }
+
+    public void setRecipeData(ArrayList<Recipe> recipes) {
+        mRecipes = recipes;
+        notifyDataSetChanged();
     }
 }

@@ -5,80 +5,78 @@ import android.os.AsyncTask;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import com.lssoftworks.u0068830.bakingapp.Data.Recipe;
 import com.lssoftworks.u0068830.bakingapp.Network.NetworkUtils;
+
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 
-import static com.lssoftworks.u0068830.bakingapp.MainFragment.mRecipes;
-import static com.lssoftworks.u0068830.bakingapp.MainFragment.setTwoPane;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+import static com.lssoftworks.u0068830.bakingapp.Data.RecipeJsonParser.getRecipes;
 
 public class MainActivity extends AppCompatActivity {
 
-
-    private String mRecipeJson;
+    public static String mRecipeJson;
+    public static ArrayList<Recipe> mRecipes;
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final String EXTRA_RECIPE_ID = "recipe_id";
-    private static final String RECIPE_ID = "recipe_id";
-    private static final String DETAILS_FRAGMENT_STATE = "details_fragment_state";
+
+    private RecipeAdapter mAdapter;
+    public static OnViewHolderClickListener viewHolderClickListener;
 
     public static DetailsFragment mDetailsFragment;
-    public static FragmentManager mFragmentManager;
 
-    private boolean mTwoPane;
-    private Recipe mRecipe;
     public static int mRecipeId;
+
+    @BindView(R.id.rv_baking_recipes)
+    RecyclerView mBakingRecipes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ButterKnife.bind(this);
 
-        if(findViewById(R.id.ll_recipe_two_pane) != null) {
-            mTwoPane = true;
+        new FetchRecipeTask().execute();
 
-            if(savedInstanceState == null) {
-                mDetailsFragment = new DetailsFragment();
-            } else {
-                mRecipeId = savedInstanceState.getInt(RECIPE_ID);
-                mDetailsFragment = (DetailsFragment) getSupportFragmentManager().getFragment(savedInstanceState, DETAILS_FRAGMENT_STATE);
-            }
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        mBakingRecipes.setLayoutManager(linearLayoutManager);
+        mBakingRecipes.setHasFixedSize(true);
 
-            mRecipe = mRecipes.get(mRecipeId);
+        mAdapter = new RecipeAdapter(mRecipes);
+        mBakingRecipes.setAdapter(mAdapter);
 
-            mDetailsFragment.setRecipe(mRecipe);
-            mDetailsFragment.setContext(this);
-
-            mFragmentManager = getSupportFragmentManager();
-
-            mFragmentManager.beginTransaction()
-                    .replace(R.id.details_container, mDetailsFragment)
-                    .commit();
-
-        } else {
-            mTwoPane = false;
-        }
-
-        MainFragment.setTwoPane(mTwoPane);
+        viewHolderClickListener = new OnViewHolderClickListener();
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+    class OnViewHolderClickListener implements View.OnClickListener {
 
-        if(mTwoPane) {
-            getSupportFragmentManager().putFragment(outState, DETAILS_FRAGMENT_STATE, mDetailsFragment);
+        @Override
+        public void onClick(View v) {
+            TextView tvName = v.findViewById(R.id.tv_recipe_name);
+            mRecipeId = Integer.parseInt(tvName.getTag().toString());
+            Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
+            intent.putExtra(EXTRA_RECIPE_ID, mRecipeId);
+            startActivity(intent);
         }
-        outState.putInt(RECIPE_ID, mRecipeId);
     }
 
-    class FetchRecipeTask extends AsyncTask<Void, Void, String> {
+    public class FetchRecipeTask extends AsyncTask<Void, Void, String> {
 
         @Override
         protected String doInBackground(Void... voids) {
@@ -108,7 +106,15 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String jsonRecipeData) {
             if(jsonRecipeData != null) {
                 mRecipeJson = jsonRecipeData;
-                Log.d(TAG, mRecipeJson);
+
+                try {
+                    mRecipes = new ArrayList<>(Arrays.asList(getRecipes(mRecipeJson)));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                mAdapter.setRecipeData(mRecipes);
+            } else {
+                Log.d(TAG, "NO DATA FOUND");
             }
         }
     }

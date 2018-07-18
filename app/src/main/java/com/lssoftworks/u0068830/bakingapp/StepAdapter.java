@@ -26,14 +26,17 @@ import butterknife.ButterKnife;
 
 public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder> {
 
+    private static final String TAG = StepAdapter.class.getSimpleName();
     private ArrayList<Recipe.Step> mStepsList;
     private SimpleExoPlayer mExoPlayer;
     private ArrayList<MediaSource> mMediaSource;
 
     StepAdapter(ArrayList<Recipe.Step> steps, SimpleExoPlayer exoPlayer, ArrayList<MediaSource> mediaSource) {
         mStepsList = steps;
-        mExoPlayer = exoPlayer;
-        mMediaSource = mediaSource;
+        if(exoPlayer != null && mediaSource != null) {
+            mExoPlayer = exoPlayer;
+            mMediaSource = mediaSource;
+        }
     }
 
     @Override
@@ -50,18 +53,21 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
 
     @Override
     public void onBindViewHolder(StepViewHolder holder, int position) {
-        holder.mStepId.setText(String.valueOf(mStepsList.get(position).getStepId()));
         holder.mShortDesc.setText(mStepsList.get(position).getShortDescription());
-        holder.mDesc.setText(mStepsList.get(position).getDescription());
+        holder.mShortDesc.setTag(mStepsList.get(position).getStepId());
         String videoUrl = mStepsList.get(position).getVideoURL();
         Log.d("VideoURL:", String.valueOf(position) + " " + videoUrl);
 
-        if(!videoUrl.equals("")) {
+        if(!videoUrl.equals("") && mExoPlayer != null && mMediaSource != null) {
+            holder.mStepId.setText(String.valueOf(mStepsList.get(position).getStepId()));
+            holder.mDesc.setText(mStepsList.get(position).getDescription());
             holder.mExoPlayerView.setVisibility(View.VISIBLE);
             holder.mExoPlayerView.setPlayer(mExoPlayer);
             mExoPlayer.prepare(mMediaSource.get(position));
             mExoPlayer.setPlayWhenReady(false);
         } else {
+            holder.mStepId.setVisibility(View.GONE);
+            holder.mDesc.setVisibility(View.GONE);
             holder.mExoPlayerView.setVisibility(View.GONE);
         }
     }
@@ -70,6 +76,7 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
     public int getItemCount() {
         if(mStepsList != null) {
             return mStepsList.size();
+
         }
 
         return 0;
@@ -94,6 +101,12 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.StepViewHolder
 
             ButterKnife.bind(this, itemView);
 
+            itemView.setOnClickListener(DetailsActivity.stepViewHolderClickListener);
         }
+    }
+
+    public void setStepData(ArrayList<Recipe.Step> steps) {
+        mStepsList = steps;
+        notifyDataSetChanged();
     }
 }
