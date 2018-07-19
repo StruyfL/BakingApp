@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,8 +30,18 @@ import butterknife.ButterKnife;
 
 public class DetailsStepFragment extends Fragment {
 
+    private final static String TAG = DetailsStepFragment.class.getSimpleName();
+    private static final String CURRENT_POSITION = "current_position";
+    private static final String PLAY_WHEN_READY = "play_when_ready";
+    private static final String CURRENT_WINDOW = "current_window";
+    private static final String VIDEO_URL = "video_url";
+    private static final String DESCRIPTION = "description";
+
     private static Recipe.Step mStep;
     private Context mContext;
+    private boolean mPlayReady;
+    private long mCurPos;
+    private int mCurWindow;
 
     private SimpleExoPlayer mExoPlayer;
     private MediaSource mMediaSource;
@@ -54,7 +65,20 @@ public class DetailsStepFragment extends Fragment {
 
         ButterKnife.bind(DetailsStepFragment.this, rootView);
 
-        if(mStep != null && mContext != null) {
+        if(savedInstanceState != null) {
+            mCurWindow = savedInstanceState.getInt(CURRENT_WINDOW);
+            mCurPos = savedInstanceState.getLong(CURRENT_POSITION);
+            mPlayReady = savedInstanceState.getBoolean(PLAY_WHEN_READY);
+            mStep.setDescription(savedInstanceState.getString(DESCRIPTION));
+            mStep.setVideoURL(savedInstanceState.getString(VIDEO_URL));
+            mContext = getContext();
+        }
+
+        Log.d(TAG, "Reloading previous state 1: " + mCurWindow + "  " + mCurPos);
+
+        if(mStep != null) {
+
+            Log.d(TAG, "Reloading previous state 2: " + mCurWindow + "  " + mCurPos);
 
             mDesc.setText(mStep.getDescription());
 
@@ -64,13 +88,37 @@ public class DetailsStepFragment extends Fragment {
 
                 mExoPlayerView.setVisibility(View.VISIBLE);
                 mExoPlayerView.setPlayer(mExoPlayer);
-                mExoPlayer.prepare(mMediaSource);
-                mExoPlayer.setPlayWhenReady(false);
+
+
+                mExoPlayer.seekTo(mCurWindow, mCurPos);
+                mExoPlayer.prepare(mMediaSource, false, false);
+                mExoPlayer.setPlayWhenReady(mPlayReady);
+                Log.d(TAG, "Reloading previous state 3: " + mCurWindow + "  " + mCurPos);
+
+
+
             }
         }
 
         return rootView;
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if(Util.SDK_INT > 23) {
+            initializeExoPlayer();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(Util.SDK_INT <= 23) {
+            initializeExoPlayer();
+        }
+    }
+
 
     public void setStep(Recipe.Step step) {
         mStep = step;
@@ -93,7 +141,41 @@ public class DetailsStepFragment extends Fragment {
                     Util.getUserAgent(mContext, "BakingApp"), mBandwidthMeter);
 
             mMediaSource = new ExtractorMediaSource.Factory(mDataSourceFactory).createMediaSource(Uri.parse(mStep.getVideoURL()));
-
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if (mExoPlayer != null) {
+            mCurPos = mExoPlayer.getCurrentPosition();
+            mPlayReady = mExoPlayer.getPlayWhenReady();
+            mCurWindow = mExoPlayer.getCurrentWindowIndex();
+        }
+
+        if(mExoPlayer != null && Util.SDK_INT <= 23) {
+            mExoPlayer.release();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if(mExoPlayer != null && Util.SDK_INT > 23) {
+            mExoPlayer.release();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putLong(CURRENT_POSITION, mCurPos);
+        outState.putBoolean(PLAY_WHEN_READY, mPlayReady);
+        outState.putInt(CURRENT_WINDOW, mCurWindow);
+        outState.putString(VIDEO_URL, mStep.getVideoURL());
+        outState.putString(DESCRIPTION, mStep.getDescription());
     }
 }

@@ -18,6 +18,7 @@ public class DetailsActivity extends AppCompatActivity {
 
     private static final String TAG = DetailsActivity.class.getSimpleName();
     private static final String STEP_ID = "step_id";
+    private static final String RECIPE_ID = "recipe_id";
     private static Recipe mRecipe;
     private int recipeId;
     private int mStepId;
@@ -36,14 +37,14 @@ public class DetailsActivity extends AppCompatActivity {
             mStepId = 0;
         } else {
             mStepId = savedInstanceState.getInt(STEP_ID);
+            recipeId = savedInstanceState.getInt(RECIPE_ID);
         }
-
         mRecipe = MainActivity.mRecipes.get(recipeId);
 
         if(findViewById(R.id.ll_recipe_two_pane) != null) {
             mTwoPane = true;
 
-            //if(savedInstanceState == null) {
+            if(savedInstanceState == null) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
 
                 DetailsStepFragment detailsStepFragment = new DetailsStepFragment();
@@ -52,6 +53,7 @@ public class DetailsActivity extends AppCompatActivity {
 
                 detailsStepsFragment.setRecipe(mRecipe);
                 detailsStepsFragment.setContext(this);
+                detailsStepsFragment.setRecipeId(recipeId);
 
                 detailsStepFragment.setStep(mRecipe.getSteps()[mStepId]);
                 detailsStepFragment.setContext(this);
@@ -62,29 +64,24 @@ public class DetailsActivity extends AppCompatActivity {
                         .commit();
 
                 stepViewHolderClickListener = new OnStepViewHolderClickListener();
-            //} else {
-                //mRecipeId = savedInstanceState.getInt(RECIPE_ID);
-                //mDetailsFragment = (DetailsFragment) getSupportFragmentManager().getFragment(savedInstanceState, DETAILS_FRAGMENT_STATE);
-            //}
+            }
 
         } else {
             mTwoPane = false;
 
-            //if(savedInstanceState == null) {
+            if(savedInstanceState == null) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
 
                 DetailsFragment detailsFragment = new DetailsFragment();
 
                 detailsFragment.setRecipe(mRecipe);
                 detailsFragment.setContext(this);
+                detailsFragment.setRecipeId(recipeId);
 
                 fragmentManager.beginTransaction()
                         .add(R.id.details_container, detailsFragment)
                         .commit();
-            //} else {
-                //mRecipeId = savedInstanceState.getInt(RECIPE_ID);
-                //mDetailsFragment = (DetailsFragment) getSupportFragmentManager().getFragment(savedInstanceState, DETAILS_FRAGMENT_STATE);
-            //}
+            }
         }
     }
 
@@ -119,6 +116,7 @@ public class DetailsActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(STEP_ID, mStepId);
+        outState.putInt(RECIPE_ID, recipeId);
 
         super.onSaveInstanceState(outState);
     }

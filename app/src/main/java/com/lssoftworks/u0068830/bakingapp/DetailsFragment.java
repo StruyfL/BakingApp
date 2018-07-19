@@ -33,12 +33,10 @@ import java.util.Arrays;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.lssoftworks.u0068830.bakingapp.MainActivity.mRecipeId;
-import static com.lssoftworks.u0068830.bakingapp.MainActivity.mRecipes;
-
 public class DetailsFragment extends Fragment {
 
     private static Recipe mRecipe;
+    private int mRecipeId;
     private String[] mQuantity;
     private String[] mMeasure;
     private String[] mIngredient;
@@ -55,6 +53,13 @@ public class DetailsFragment extends Fragment {
     private static final String STEPSLIST_POSITION = "stepslist_position";
     private static final String RECIPE_ID = "recipe_id";
     private static final String TAG = DetailsFragment.class.getSimpleName();
+    private static final String CURRENT_POSITION = "current_position";
+    private static final String PLAY_WHEN_READY = "play_when_ready";
+    private static final String CURRENT_WINDOW = "current_window";
+
+    private boolean mPlayReady;
+    private long mCurPos;
+    private int mCurWindow;
 
     @BindView(R.id.tv_recipe_name)
     TextView mRecipeName;
@@ -72,11 +77,18 @@ public class DetailsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        Log.d(TAG, "Calling onCreateView");
-
         View rootView = inflater.inflate(R.layout.fragment_details, container, false);
 
         ButterKnife.bind(DetailsFragment.this, rootView);
+
+        if(savedInstanceState != null) {
+            mCurWindow = savedInstanceState.getInt(CURRENT_WINDOW);
+            mCurPos = savedInstanceState.getLong(CURRENT_POSITION);
+            mPlayReady = savedInstanceState.getBoolean(PLAY_WHEN_READY);
+            mRecipeId = savedInstanceState.getInt(RECIPE_ID);
+            mRecipe = MainActivity.mRecipes.get(mRecipeId);
+            mContext = getContext();
+        }
 
         if(mRecipe != null && mContext != null) {
 
@@ -105,19 +117,31 @@ public class DetailsFragment extends Fragment {
 
             if(savedInstanceState != null) {
                 mStepList.getLayoutManager().onRestoreInstanceState(layoutManagerSavedState);
-            } else {
-
             }
 
             initializeExoPlayer();
 
-            mAdapter = new StepAdapter(mSteps, mExoPlayer, mMediaSource);
+            mAdapter = new StepAdapter(mSteps, mExoPlayer, mMediaSource, mCurWindow, mCurPos);
             mStepList.setAdapter(mAdapter);
-
-
         }
 
         return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if(Util.SDK_INT > 23) {
+            initializeExoPlayer();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(Util.SDK_INT <= 23) {
+            initializeExoPlayer();
+        }
     }
 
     void initializeExoPlayer() {
@@ -146,12 +170,45 @@ public class DetailsFragment extends Fragment {
         mContext = context;
     }
 
+    public void setRecipeId(int id) {
+        mRecipeId = id;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if (mExoPlayer != null) {
+            mCurPos = mExoPlayer.getCurrentPosition();
+            mPlayReady = mExoPlayer.getPlayWhenReady();
+            mCurWindow = mExoPlayer.getCurrentWindowIndex();
+        }
+
+        if(mExoPlayer != null && Util.SDK_INT <= 23) {
+            mExoPlayer.release();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if(mExoPlayer != null && Util.SDK_INT > 23) {
+            mExoPlayer.release();
+        }
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
+        Log.d(TAG, RECIPE_ID + " " + mRecipeId);
+
         outState.putParcelable(STEPSLIST_POSITION, mStepList.getLayoutManager().onSaveInstanceState());
-        //outState.putParcelable(STEPSLIST_POSITION, mLinearLayoutManager.onSaveInstanceState());
+        outState.putInt(RECIPE_ID, mRecipeId);
+        outState.putLong(CURRENT_POSITION, mCurPos);
+        outState.putBoolean(PLAY_WHEN_READY, mPlayReady);
+        outState.putInt(CURRENT_WINDOW, mCurWindow);
     }
 
     @Override
@@ -163,12 +220,4 @@ public class DetailsFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        if(mExoPlayer != null) {
-            mExoPlayer.release();
-        }
-    }
 }
